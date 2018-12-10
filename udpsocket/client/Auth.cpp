@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <thread>
+#include <glog/logging.h>
 
 #define PORT 9876 //服务端端口号
 #define CLIPORT 12345 //本程序端口号
@@ -27,6 +28,15 @@ int sockfd = 0;//udp标识符
 int lasttype = 0;//上次发送的包的种类
 char *Authkey;//保存注册码
 ClientBack cb = NULL;//回调函数
+
+/*
+ * 0：程序需要退出
+ * 1：程序正常运行
+ * 2: 连接中断
+*/
+int cur_status = -1;            
+
+
 
 void ClearArr(char *buf, int length)
 {
@@ -175,6 +185,7 @@ void DealData(int sockfd, char *buf, int length)
             Check = 1;
         }
         if(cb != NULL){
+            cur_status = Check;
             cb(Check);
         }
         SendData(sockfd, 5, NULL, 0, NULL);
@@ -199,11 +210,15 @@ void AuthCheck()
 {
     FILE *fd;
     char str[100];
-    fd=fopen("register.txt","r");
+    std::string path = ecutility::GetAppDir();
+    path += "/register.txt";
+
+    fd = fopen(path.c_str(),"r");
     
-    if(fd==NULL){
-        printf("请先告知管理员注册！\n");
+    if( fd == NULL && cb != NULL ){
         cb(3);
+        cur_status = 0;
+        return;
     }
     fscanf(fd,"%s",str);
     fclose(fd);
@@ -250,7 +265,9 @@ void Client()
     {
         if (count >= 15)
         {
-            cb(2);
+            cur_status = 0;
+            //cb(2);
+            cb(cur_status);
         }
         if(!iskill){
             break;
@@ -261,9 +278,9 @@ void Client()
         FD_ZERO(&read_flags);
         FD_SET(sockfd, &read_flags);
         errmsg = select(sockfd + 1, &read_flags, 0, 0, &waitd);
-        if (errmsg == 0)
-        {
+        if( errmsg == 0 ){
             count++;
+            cb(cur_status);
             continue;
         }
         if (FD_ISSET(sockfd, &read_flags))
