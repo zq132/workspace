@@ -3,3 +3,4 @@ portcheck (从ip抓包)/build/
 portcheck (原始)/build/
 udpsocket/client/build/
 udpsocket/eccheck/build/
+createAuthKey/build/
