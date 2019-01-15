@@ -56,16 +56,19 @@ void SendData(int sockfd, int type)  //客户端, DWORD serno, char *key, int ke
     
     switch (type)
     {
-        case 1:
+        case 1://运行命令包
             length = 22 + 2;
             break;
-        case 4:
+        case 4://心跳包
             length = 23;
             break;
-        case 5:
+        case 5://确认包
             length = 22 + 5;
             break;
-        case -1:
+        case -1://注册成功但监听到端口需要退出
+            length = 22 + 2;
+            break;
+        case 0://未注册需要退出
             length = 22 + 2;
             break;
     }
@@ -89,7 +92,11 @@ void SendData(int sockfd, int type)  //客户端, DWORD serno, char *key, int ke
     message->times = tv.tv_sec;
     message->second = 0x0;
 
-    if(type == -1){//程序退出命令包(注册码检测失败,监听到端口退出)
+    if(type == 0){//注册码检测失败,退出命令
+        buf[20] = 0x01;
+        buf[21] = 0x02;
+    }
+    if(type == -1){//程序退出命令包(监听到端口退出)
         buf[20] = 0x01;
         buf[21] = 0x00;
         // if(islisten == false){ //isstart判断监听程序是否启动
@@ -174,7 +181,7 @@ void DealData(int sockfd, char *buf,int length)
         buf[length-2]='\0';
         int isrun = CheckKey(p);
         if(isrun == -1){
-            SendData(sockfd, -1);
+            SendData(sockfd, -1);//注册失败
             return;
         }
         if(isrun == 1){
@@ -255,7 +262,7 @@ void RunServer()
         waitd.tv_usec = 0;
         if(islisten == false){
             char str[] = "监听成功\n";
-            SendData(sockfd,-1);
+            SendData(sockfd,-1);//监听成功需要退出。
             islisten = true;
             continue;
         }

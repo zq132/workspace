@@ -10,7 +10,15 @@
  *     2:代表长时间未收到服务端发出的心跳包
  *     3:读取注册码失败
 */
-typedef void (*ClientBack)(int a);
+
+enum class ExitSign{
+    Listening_port,//监听到端口退出
+    RUN,//正常运行
+    UNRegistered,//未注册
+    Disconnect_serv//与服务断开连接
+};
+
+typedef int (*ClientBack)(ExitSign sign);
 class Auth
 {
 public:
