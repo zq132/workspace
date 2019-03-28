@@ -4,3 +4,6 @@ portcheck (原始)/build/
 udpsocket/client/build/
 udpsocket/eccheck/build/
 createAuthKey/build/
+*/build/
+*/.vscode/
+myslq/build*/

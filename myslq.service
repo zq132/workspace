@@ -1,11 +1,11 @@
 [Unit]
-Description=myslq 
+Description=myslq
+After=network.target
 [Service]
-ExecStart=/etc/myslq/myslq
+Type=simple
+ExecStart=/sbin/myslq
 ExecStop=/bin/kill -TERM $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID
-killMode=process
-After=network.target
-Restart=Always
+Restart=always
 [Install]
 WantedBy=multi-user.target
