@@ -64,12 +64,12 @@ bool EcCrypto::CreateSerialNo(std::string &serial)
     std::string diskid;
     GetDiskSerial(diskid);
 
-    if (cpuid.empty() || diskid.empty())
-    {
-        return false;
-    }
-
     cpuid += diskid;
+    if (cpuid.empty())
+     {
+         return false;
+     }
+
     unsigned char md[16];
     MD5((unsigned char*)cpuid.c_str(),cpuid.size(),md);
     char temp[3] = {'\0'};
